@@ -1,6 +1,7 @@
 package com.codigo.examen.service.impl;
 
-import com.codigo.examen.entity.Role;
+
+import com.codigo.examen.entity.Rol;
 import com.codigo.examen.entity.Usuario;
 import com.codigo.examen.repository.UsuarioRepository;
 import com.codigo.examen.request.SignInRequest;
@@ -14,6 +15,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -21,16 +26,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
-    @Override
+    @Override //para registrar un usuario
     public Usuario signUpUser(SignUpRequest signUpRequest) {
         Usuario usuario = new Usuario();
+        Rol rol = new Rol();
+        HashSet<Rol> roles = new HashSet<Rol>();
+        roles.add(rol);
+        rol.setIdRol(null);
         usuario.setUsername(signUpRequest.getUsername());
         usuario.setTelefono(signUpRequest.getTelefono());
         usuario.setEmail(signUpRequest.getEmail());
-        //usuario.setRole(Role.USER);
+        usuario.setRoles(roles);
         usuario.setPassword(new BCryptPasswordEncoder().encode(signUpRequest.getPassword()));
         return usuarioRepository.save(usuario);
     }
+
 
     @Override
     public Usuario signUpAdmin(SignUpRequest signUpRequest) {
@@ -38,10 +48,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         usuario.setUsername(signUpRequest.getUsername());
         usuario.setTelefono(signUpRequest.getTelefono());
         usuario.setEmail(signUpRequest.getEmail());
-        //usuario.setRole(Role.ADMIN);
+        usuario.setRoles((Set<Rol>) new Rol());
         usuario.setPassword(new BCryptPasswordEncoder().encode(signUpRequest.getPassword()));
-        return usuarioRepository.save(usuario);
+        return null;
     }
+
 
     //MEOTODO DE LOGIN
     @Override

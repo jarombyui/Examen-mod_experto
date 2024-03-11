@@ -56,12 +56,20 @@ public class Usuario implements UserDetails {
         return roles.stream().map(Rol::getNombreRol).collect(Collectors.toSet());
     }
 
-    @Override
+    /*@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(x-> new SimpleGrantedAuthority(x.getNombreRol())).collect(Collectors.toList());
-    }
+        return roles.stream().map(x-> new SimpleGrantedAuthority(x.getNombreRol()))
+                .collect(Collectors.toList());
+    }*/
 
     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return  roles.stream()
+                .map(rol -> new SimpleGrantedAuthority(rol.getNombreRol()))
+                .collect(Collectors.toList());
+    }
+
+    //@Override
     public String getUsermane(){
         return username;
     }

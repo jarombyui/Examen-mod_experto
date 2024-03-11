@@ -1,6 +1,7 @@
 package com.codigo.examen.config;
 
 import com.codigo.examen.entity.Rol;
+import com.codigo.examen.service.RolService;
 import com.codigo.examen.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.management.relation.Role;
+import java.util.Optional;
 
 @Configuration
 @EnableWebSecurity
@@ -27,22 +29,30 @@ import javax.management.relation.Role;
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationConfiguration authenticationConfiguration;
+
     private final UsuarioService usuarioService;
+    private  final RolService rolService;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
+         Rol adminRol = rolService.findByNombreRol("ADMIN").orElseThrow(()-> new RuntimeException(""));
+         Rol usuarioRol = rolService.findByNombreRol("USER").orElseThrow(()-> new RuntimeException(""));
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request.requestMatchers("/api/v1/autenticacion/**")
                         .permitAll()
-                        .requestMatchers("admin/").hasAnyAuthority(Role.roleValueToString(Admin))
-                        .requestMatchers("/ms-examen/v1/usuarios**").hasAnyAuthority(Role.roleValueToString())
+                        .requestMatchers("/ms-examen/v1/admin**").hasAnyAuthority(adminRol.getNombreRol())
+                        .requestMatchers("/ms-examen/v1/usuarios**").hasAnyAuthority(usuarioRol.getNombreRol())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// no mantener una sesion para cada usuario
                 .authenticationProvider(authenticationProvider()).addFilterBefore(
                         jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
                 );
         return httpSecurity.build();
+
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -58,7 +68,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }
