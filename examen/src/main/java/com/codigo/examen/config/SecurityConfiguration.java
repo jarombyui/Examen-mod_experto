@@ -1,5 +1,6 @@
 package com.codigo.examen.config;
 
+import com.codigo.examen.entity.Rol;
 import com.codigo.examen.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -18,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.management.relation.Role;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,8 +34,8 @@ public class SecurityConfiguration {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request.requestMatchers("/api/v1/autenticacion/**")
                         .permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority(IdRole.ADMIN())
-                        .requestMatchers("/api/v1/user/**").hasAnyAuthority(Role.USER.name())
+                        .requestMatchers("admin/").hasAnyAuthority(Role.roleValueToString(Admin))
+                        .requestMatchers("/ms-examen/v1/usuarios**").hasAnyAuthority(Role.roleValueToString())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// no mantener una sesion para cada usuario
                 .authenticationProvider(authenticationProvider()).addFilterBefore(
